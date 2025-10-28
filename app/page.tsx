@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ViewType, Deck, ChatMessage } from '@/types/deck';
 import { initialDecks } from '@/data/initialDecks';
 import { colorSchemes } from '@/data/colorSchemes';
+import { loadDecks } from '@/lib/deckLoader';
 import { HomeView } from '@/components/HomeView';
 import { DeckView } from '@/components/DeckView';
 import { EditView } from '@/components/EditView';
@@ -21,11 +22,31 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isAiTyping, setIsAiTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize decks on mount
+  // Initialize decks on mount - Load from JSON files
   useEffect(() => {
+    async function initializeDecks() {
+      setIsLoading(true);
+      try {
+        const decks = await loadDecks();
+        if (decks.length > 0) {
+          setAllDecks(decks);
+        } else {
+          // Fallback to hardcoded decks if JSON loading fails
+          console.warn('Using fallback decks from initialDecks.ts');
+          setAllDecks(initialDecks);
+        }
+      } catch (error) {
+        console.error('Error loading decks:', error);
+        setAllDecks(initialDecks);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     if (allDecks.length === 0) {
-      setAllDecks(initialDecks);
+      initializeDecks();
     }
   }, [allDecks.length]);
 
