@@ -340,14 +340,12 @@ const tools: Anthropic.Tool[] = [
 ];
 
 export async function POST(request: Request) {
-  let message: string, deck: any, currentSlide: number, conversationHistory: any[];
-
   try {
     const body = await request.json();
-    message = body.message;
-    deck = body.deck;
-    currentSlide = body.currentSlide;
-    conversationHistory = body.conversationHistory || [];
+    const message: string = body.message;
+    const deck: any = body.deck;
+    const currentSlide: number = body.currentSlide;
+    const conversationHistory: any[] = body.conversationHistory || [];
 
     // Check if API key is valid - use test mode if not
     const useTestMode = !process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY === 'test-key';
@@ -433,117 +431,125 @@ Be helpful, creative, and make sure the changes improve the presentation!`;
       },
     ];
 
-    // Call Claude with tools
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages,
-      tools,
-    });
+    // Call Claude with tools (with error handling for API issues)
+    try {
+      const response = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages,
+        tools,
+      });
 
-    // Extract text response and tool uses
-    let aiMessage = '';
-    const toolUses: any[] = [];
+      // Extract text response and tool uses
+      let aiMessage = '';
+      const toolUses: any[] = [];
 
-    for (const block of response.content) {
-      if (block.type === 'text') {
-        aiMessage += block.text;
-      } else if (block.type === 'tool_use') {
-        toolUses.push({
-          name: block.name,
-          input: block.input,
-        });
+      for (const block of response.content) {
+        if (block.type === 'text') {
+          aiMessage += block.text;
+        } else if (block.type === 'tool_use') {
+          toolUses.push({
+            name: block.name,
+            input: block.input,
+          });
+        }
       }
-    }
 
-    // Convert tool uses to action format for frontend
-    const actions = toolUses.map((tool) => {
-      switch (tool.name) {
-        case 'update_slide_content':
-          return {
-            type: 'update_slide',
-            slideIndex: tool.input.slideIndex,
-            updates: tool.input.updates,
-          };
-        case 'change_color_scheme':
-          return {
-            type: 'change_color_scheme',
-            colorSchemeName: tool.input.colorSchemeName,
-          };
-        case 'add_new_slide':
-          return {
-            type: 'add_slide',
-            slideType: tool.input.slideType,
-            position: tool.input.position,
-            content: tool.input.content,
-          };
-        case 'remove_slide':
-          return {
-            type: 'remove_slide',
-            slideIndex: tool.input.slideIndex,
-          };
-        case 'update_slide_data':
-          return {
-            type: 'update_data',
-            slideIndex: tool.input.slideIndex,
-            dataType: tool.input.dataType,
-            data: tool.input.data,
-          };
-        case 'add_slide_image':
-          return {
-            type: 'add_image',
-            slideIndex: tool.input.slideIndex,
-            imageDescription: tool.input.imageDescription,
-            imageStyle: tool.input.imageStyle,
-            imageUrl: tool.input.imageUrl,
-          };
-        case 'reorder_slides':
-          return {
-            type: 'reorder',
-            fromIndex: tool.input.fromIndex,
-            toIndex: tool.input.toIndex,
-          };
-        default:
-          return null;
-      }
-    }).filter(Boolean);
-
-    return NextResponse.json({
-      message: aiMessage || "I've made the requested changes to your deck!",
-      actions,
-      usage: {
-        input_tokens: response.usage.input_tokens,
-        output_tokens: response.usage.output_tokens,
-      },
-    });
-  } catch (error: any) {
-    console.error('API Error:', error);
-
-    // If error is due to low credits, fall back to test mode
-    if (error.message && error.message.includes('credit balance')) {
-      console.log('⚠️ Low credits detected - falling back to TEST MODE');
-
-      const testResult = parseTestModeRequest(message, deck, currentSlide);
+      // Convert tool uses to action format for frontend
+      const actions = toolUses.map((tool) => {
+        switch (tool.name) {
+          case 'update_slide_content':
+            return {
+              type: 'update_slide',
+              slideIndex: tool.input.slideIndex,
+              updates: tool.input.updates,
+            };
+          case 'change_color_scheme':
+            return {
+              type: 'change_color_scheme',
+              colorSchemeName: tool.input.colorSchemeName,
+            };
+          case 'add_new_slide':
+            return {
+              type: 'add_slide',
+              slideType: tool.input.slideType,
+              position: tool.input.position,
+              content: tool.input.content,
+            };
+          case 'remove_slide':
+            return {
+              type: 'remove_slide',
+              slideIndex: tool.input.slideIndex,
+            };
+          case 'update_slide_data':
+            return {
+              type: 'update_data',
+              slideIndex: tool.input.slideIndex,
+              dataType: tool.input.dataType,
+              data: tool.input.data,
+            };
+          case 'add_slide_image':
+            return {
+              type: 'add_image',
+              slideIndex: tool.input.slideIndex,
+              imageDescription: tool.input.imageDescription,
+              imageStyle: tool.input.imageStyle,
+              imageUrl: tool.input.imageUrl,
+            };
+          case 'reorder_slides':
+            return {
+              type: 'reorder',
+              fromIndex: tool.input.fromIndex,
+              toIndex: tool.input.toIndex,
+            };
+          default:
+            return null;
+        }
+      }).filter(Boolean);
 
       return NextResponse.json({
-        message: `[TEST MODE - No API Credits] ${testResult.message}\n\n💡 Add credits to your Anthropic account to use real AI.`,
-        actions: testResult.actions,
-        usage: { input_tokens: 0, output_tokens: 0 },
-        testMode: true
+        message: aiMessage || "I've made the requested changes to your deck!",
+        actions,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
       });
-    }
+    } catch (apiError: any) {
+      console.error('API Error:', apiError);
 
-    if (error.status === 401) {
+      // If error is due to low credits, fall back to test mode
+      if (apiError.message && apiError.message.includes('credit balance')) {
+        console.log('⚠️ Low credits detected - falling back to TEST MODE');
+
+        const testResult = parseTestModeRequest(message, deck, currentSlide);
+
+        return NextResponse.json({
+          message: `[TEST MODE - No API Credits] ${testResult.message}\n\n💡 Add credits to your Anthropic account to use real AI.`,
+          actions: testResult.actions,
+          usage: { input_tokens: 0, output_tokens: 0 },
+          testMode: true
+        });
+      }
+
+      if (apiError.status === 401) {
+        return NextResponse.json(
+          { error: 'Invalid Anthropic API key. Please check your .env.local file.' },
+          { status: 401 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'Invalid Anthropic API key. Please check your .env.local file.' },
-        { status: 401 }
+        { error: apiError.message || 'An error occurred while processing your request.' },
+        { status: 500 }
       );
     }
-
+  } catch (error: any) {
+    console.error('Request Error:', error);
     return NextResponse.json(
-      { error: error.message || 'An error occurred while processing your request.' },
-      { status: 500 }
+      { error: error.message || 'Failed to parse request body.' },
+      { status: 400 }
     );
   }
 }
