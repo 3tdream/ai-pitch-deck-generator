@@ -16,6 +16,9 @@ interface EditViewProps {
   onChatInputChange: (value: string) => void;
   onSendMessage: () => void;
   isAiTyping: boolean;
+  onUpdateSlide: (slideIndex: number, updates: Partial<any>) => void;
+  onShowBackgroundPanel: () => void;
+  onShowImagePanel: () => void;
 }
 
 export function EditView({
@@ -30,7 +33,9 @@ export function EditView({
   chatInput,
   onChatInputChange,
   onSendMessage,
-  isAiTyping
+  isAiTyping,
+  onShowBackgroundPanel,
+  onShowImagePanel
 }: EditViewProps) {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isAiTyping) {
@@ -121,6 +126,25 @@ export function EditView({
                     }`}
                   />
                 ))}
+              </div>
+
+              {/* Quick Edit Buttons */}
+              <div className="flex gap-3 justify-center mt-6">
+                <button
+                  onClick={onShowBackgroundPanel}
+                  className="flex items-center gap-2 bg-slate-800 text-white px-5 py-2.5 rounded-lg hover:bg-slate-700 transition-all border border-slate-700 hover:border-purple-500/50"
+                >
+                  <div className="w-4 h-4 rounded bg-gradient-to-br from-purple-500 to-blue-500"></div>
+                  <span className="text-sm font-semibold">Background</span>
+                </button>
+
+                <button
+                  onClick={onShowImagePanel}
+                  className="flex items-center gap-2 bg-slate-800 text-white px-5 py-2.5 rounded-lg hover:bg-slate-700 transition-all border border-slate-700 hover:border-purple-500/50"
+                >
+                  <span className="text-lg">🖼️</span>
+                  <span className="text-sm font-semibold">Add Image</span>
+                </button>
               </div>
             </div>
           </div>

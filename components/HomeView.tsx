@@ -24,13 +24,6 @@ export function HomeView({ allDecks, onOpenDeck, onShowNewDeckModal }: HomeViewP
       <div className="relative z-10 max-w-7xl mx-auto px-8 py-12">
         {/* Hero Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 mb-6 bg-white bg-opacity-5 backdrop-blur-xl px-6 py-3 rounded-full border border-white border-opacity-10">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-lg flex items-center justify-center shadow-lg animate-pulse">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-purple-300 font-semibold text-sm">Powered by Advanced AI</span>
-          </div>
-
           <h1 className="text-7xl font-black text-white mb-6 tracking-tight leading-tight">
             Create Stunning
             <br />
