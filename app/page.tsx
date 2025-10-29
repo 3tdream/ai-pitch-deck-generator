@@ -184,7 +184,7 @@ export default function Home() {
     if (!selectedDeck) return;
     setCurrentView('edit');
     setChatMessages([{
-      role: 'assistant',
+      role: 'assistant' as const,
       content: `Hi! I'm your AI assistant. I can help you edit "${selectedDeck.title}". You can ask me to:\n\n• Change slide content\n• Adjust colors and styling\n• Add or remove slides\n• Modify text and data\n\nWhat would you like to change?`
     }]);
   };
@@ -407,7 +407,7 @@ export default function Home() {
     if (!chatInput.trim() || isAiTyping || !selectedDeck) return;
 
     const userMessage = chatInput.trim();
-    const newMessages = [...chatMessages, { role: 'user', content: userMessage }];
+    const newMessages: ChatMessage[] = [...chatMessages, { role: 'user' as const, content: userMessage }];
     setChatMessages(newMessages);
     setChatInput('');
     setIsAiTyping(true);
@@ -435,7 +435,7 @@ export default function Home() {
       // Add AI response to chat
       setChatMessages(prev => [
         ...prev,
-        { role: 'assistant', content: data.message }
+        { role: 'assistant' as const, content: data.message }
       ]);
 
       // Save current state to history before making changes
@@ -455,7 +455,7 @@ export default function Home() {
       setChatMessages(prev => [
         ...prev,
         {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: `Sorry, I encountered an error: ${error.message}. Please make sure your Anthropic API key is configured in the .env.local file.`
         }
       ]);
