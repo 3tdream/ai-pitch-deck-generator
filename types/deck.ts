@@ -14,12 +14,18 @@ export interface TitleSlide {
   title: string;
   subtitle: string;
   content: string;
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface ProblemSlide {
   type: 'problem';
   title: string;
   points: string[];
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface SolutionSlide {
@@ -27,6 +33,9 @@ export interface SolutionSlide {
   title: string;
   description: string;
   features: string[];
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface MarketSlide {
@@ -35,6 +44,9 @@ export interface MarketSlide {
   stat: string;
   description: string;
   details: string;
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface BusinessSlide {
@@ -45,6 +57,9 @@ export interface BusinessSlide {
     price: string;
     users: string;
   }[];
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface TractionSlide {
@@ -54,6 +69,9 @@ export interface TractionSlide {
     label: string;
     value: string;
   }[];
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface TeamSlide {
@@ -64,6 +82,9 @@ export interface TeamSlide {
     role: string;
     background: string;
   }[];
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export interface AskSlide {
@@ -72,6 +93,9 @@ export interface AskSlide {
   amount: string;
   usage: string;
   goal: string;
+  customBackground?: string;
+  slideImage?: string;
+  imageStyle?: 'background' | 'corner' | 'center';
 }
 
 export type Slide =

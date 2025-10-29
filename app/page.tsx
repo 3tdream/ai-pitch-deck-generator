@@ -199,6 +199,23 @@ export default function Home() {
     setCurrentSlide(index);
   };
 
+  
+  // Update slide content
+  const updateSlideContent = (slideIndex: number, updates: Partial<any>) => {
+    if (!selectedDeck) return;
+
+    const updatedSlides = [...selectedDeck.slides];
+    updatedSlides[slideIndex] = { ...updatedSlides[slideIndex], ...updates };
+
+    const updatedDeck: Deck = {
+      ...selectedDeck,
+      slides: updatedSlides
+    };
+
+    setSelectedDeck(updatedDeck);
+    setAllDecks(allDecks.map(deck => deck.id === selectedDeck.id ? updatedDeck : deck));
+  };
+
   // Render appropriate view based on current state
   if (currentView === 'home') {
     return (
@@ -251,6 +268,7 @@ export default function Home() {
         onChatInputChange={setChatInput}
         onSendMessage={sendChatMessage}
         isAiTyping={isAiTyping}
+        onUpdateSlide={updateSlideContent}
       />
     );
   }
